@@ -1,2 +1,10 @@
-# goldenhourphotomaker
-Golden Hour is a browser sunlight editor. Upload a photo; it estimates depth and scene classes (water, sky, people, ground) locally, then adds directional golden-hour light. Aim the sun, tune intensity and shadows, grade the original, paint sunlight with brushes, compare before/after, and save. Models run fully offline. Photos never leave this tab.
+Golden Hour
+Golden Hour is a privacy-first sunlight editor that runs entirely in the browser. Drop in any photo and the app estimates scene depth plus semantic classes such as sky, water, people, ground, buildings, and foliage. It then paints directional golden-hour light that respects those surfaces instead of flattening the picture with a global filter. Lakes stay open water rather than turning into a shadow wall. People and structures pick up rim light and contact shadows.
+All inference happens on your machine. Depth uses Depth Anything V2 Small. Segmentation uses a SegFormer model fine-tuned on ADE20K. Both models and the Transformers.js runtime ship in the vendor folder, so the editor works offline after the page loads. Nothing is uploaded to a server.
+Lighting that you can aim
+A compass-style sun pad sets direction and elevation. Drag the handle toward a corner for low raking light, or toward the center for a higher sun. A second slider moves the look from overcast to intense, and a third slider controls how hard the shadows fall. Picture controls grade the original photo first—brightness, contrast, hue, saturation, and sepia—then sunlight is added on top so color work does not fight the lighting pass.
+Brush and review
+When automatic lighting misses a patch, an add-and-subtract brush fills sunlight from nearby lighting, including clipped highlights, or restores the original pixels. Choose solid, feather, or soft edges and stamp with circle, square, rectangle, triangle, or line shapes. Size and opacity are adjustable. Before/after comparison toggles the untreated image so you can judge the edit honestly, then save exports a high-resolution JPEG.
+Who it is for
+Photographers, designers, and anyone who wants warmer late-day light without a cloud account or a desktop plugin. Serve the folder over HTTPS or a local web server so the WASM runtimes can load. Open the page, choose an image, wait for scene analysis, then drag the sun until the light feels right.
+Golden Hour is a static web app: HTML, CSS, and JavaScript. There is no backend, no signup, no telemetry. Your photos never leave the tab.
