@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golden Hour — Sunlight Editor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Golden Hour</h1>
+          <p>Realistic sunlight from any direction</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="brush-toggle" class="btn ghost" type="button" disabled aria-pressed="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+            <path d="M2 2l7.586 7.586"/>
+          </svg>
+          Brush
+        </button>
+        <label class="btn ghost" for="file-input">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Upload photo
+        </label>
+        <input id="file-input" type="file" accept="image/*" hidden>
+        <button id="compare-btn" class="btn ghost" type="button" disabled aria-pressed="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="5" width="8" height="14" rx="1"/>
+            <rect x="13" y="5" width="8" height="14" rx="1"/>
+          </svg>
+          Before / after
+        </button>
+        <button id="download-btn" class="btn" type="button" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Save
+        </button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div id="dropzone" class="dropzone">
+        <div class="view-stack">
+          <canvas id="canvas" hidden></canvas>
+          <canvas id="brush-overlay" hidden></canvas>
+        </div>
+        <div id="compare-badge" class="compare-badge" hidden>After</div>
+        <div id="empty" class="empty">
+          <div class="sun-icon" aria-hidden="true"></div>
+          <h2>Drop a photo to light it</h2>
+          <p>The app estimates depth and scene classes (water, sky, people, ground), then lights each one like golden hour. Lakes stay open water, not a shadow wall. Models run locally from the vendor folder — no internet required.</p>
+          <label class="btn" for="file-input">Choose image</label>
+        </div>
+        <div id="processing" class="processing" hidden>Estimating scene depth…</div>
+      </div>
+    </main>
+
+    <footer class="dock">
+      <div class="controls" id="controls">
+        <div class="sun-pad-wrap">
+          <span class="ctrl-label">Direction</span>
+          <div id="sun-pad" class="sun-pad" role="slider" aria-label="Sun direction" aria-disabled="true">
+            <span class="pad-guide n">N</span>
+            <div id="sun-handle" class="sun-handle"></div>
+          </div>
+          <strong id="sun-dir-label">Upper left · low</strong>
+        </div>
+        <div class="slider-wrap" id="slider-wrap">
+          <div class="slider-block">
+            <div class="slider-labels">
+              <span>Overcast</span>
+              <strong id="sun-value">0%</strong>
+              <span>Intense</span>
+            </div>
+            <div class="slider-row">
+              <svg class="slider-icon dim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="4"/>
+              </svg>
+              <input id="sun-slider" type="range" min="0" max="160" value="0" disabled>
+              <svg class="slider-icon hot" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+              </svg>
+            </div>
+          </div>
+          <div class="slider-block">
+            <div class="slider-labels">
+              <span>No shadows</span>
+              <strong id="shadow-value">100%</strong>
+              <span>Hard shadows</span>
+            </div>
+            <div class="slider-row">
+              <svg class="slider-icon dim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="4" y="10" width="16" height="10" rx="1"/>
+                <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+              </svg>
+              <input id="shadow-slider" class="shadow-range" type="range" min="0" max="100" value="100" disabled>
+              <svg class="slider-icon hot" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="3"/>
+                <path d="M12 11l7 9H5l7-9z" opacity="0.85"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="controls brush-panel">
+        <div class="grade-heading">
+          <span class="ctrl-label">Brush</span>
+          <span class="grade-note">Add fills sunlight from nearby lighting, including clipped highlights · Subtract restores original</span>
+        </div>
+        <div class="brush-toolbar">
+          <div class="seg" id="brush-mode" role="group" aria-label="Brush mode">
+            <button type="button" class="seg-btn" data-mode="add" aria-pressed="true">Add</button>
+            <button type="button" class="seg-btn" data-mode="subtract" aria-pressed="false">Subtract</button>
+          </div>
+          <div class="seg" id="brush-edge" role="group" aria-label="Brush edge">
+            <button type="button" class="seg-btn" data-edge="solid" aria-pressed="false">Solid</button>
+            <button type="button" class="seg-btn" data-edge="feather" aria-pressed="true">Feather</button>
+            <button type="button" class="seg-btn" data-edge="soft" aria-pressed="false">Soft</button>
+          </div>
+          <div class="seg" id="brush-shape" role="group" aria-label="Brush shape">
+            <button type="button" class="seg-btn" data-shape="circle" aria-pressed="true" title="Circle">○</button>
+            <button type="button" class="seg-btn" data-shape="square" aria-pressed="false" title="Square">□</button>
+            <button type="button" class="seg-btn" data-shape="rectangle" aria-pressed="false" title="Rectangle">▭</button>
+            <button type="button" class="seg-btn" data-shape="triangle" aria-pressed="false" title="Triangle">△</button>
+            <button type="button" class="seg-btn" data-shape="line" aria-pressed="false" title="Line">／</button>
+          </div>
+          <button type="button" id="brush-fill" class="btn ghost compact" disabled>Fill all</button>
+          <button type="button" id="brush-clear" class="btn ghost compact" disabled>Clear all</button>
+        </div>
+        <div class="brush-sliders">
+          <label class="grade-block">
+            <span>Size <strong id="brush-size-value">48</strong></span>
+            <input id="brush-size" class="grade-range" type="range" min="8" max="280" value="48" disabled>
+          </label>
+          <label class="grade-block">
+            <span>Opacity <strong id="brush-opacity-value">100%</strong></span>
+            <input id="brush-opacity" class="grade-range" type="range" min="5" max="100" value="100" disabled>
+          </label>
+        </div>
+      </div>
+      <div class="controls grade-panel">
+        <div class="grade-heading">
+          <span class="ctrl-label">Picture</span>
+          <span class="grade-note">Original photo only — sunlight is added after</span>
+        </div>
+        <div class="grade-sliders">
+          <label class="grade-block">
+            <span>Brightness <strong id="bright-value">0</strong></span>
+            <input id="grade-bright" class="grade-range" type="range" min="-100" max="100" value="0" disabled>
+          </label>
+          <label class="grade-block">
+            <span>Contrast <strong id="contrast-value">0</strong></span>
+            <input id="grade-contrast" class="grade-range" type="range" min="-100" max="100" value="0" disabled>
+          </label>
+          <label class="grade-block">
+            <span>Hue <strong id="hue-value">0°</strong></span>
+            <input id="grade-hue" class="grade-range hue-range" type="range" min="-180" max="180" value="0" disabled>
+          </label>
+          <label class="grade-block">
+            <span>Saturation <strong id="sat-value">0</strong></span>
+            <input id="grade-sat" class="grade-range" type="range" min="-100" max="100" value="0" disabled>
+          </label>
+          <label class="grade-block">
+            <span>Sepia <strong id="sepia-value">0</strong></span>
+            <input id="grade-sepia" class="grade-range sepia-range" type="range" min="0" max="100" value="0" disabled>
+          </label>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
