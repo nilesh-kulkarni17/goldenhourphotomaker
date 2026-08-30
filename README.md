@@ -1,4 +1,4 @@
-# Golden Hour
+# Golden Hour - Realistic Sunset Lighting for Low Light Portaits
 
 **Golden Hour** is a privacy-first, browser-based sunlight editor that transforms ordinary photographs into warm, directional golden-hour scenes without relying on cloud processing, external APIs, or desktop editing software.
 
